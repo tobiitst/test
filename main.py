@@ -145,10 +145,10 @@ class CommandReader (threading.Thread):
                     state, details = self.session.fetch(message, '(BODY[HEADER.FIELDS (SUBJEC FROM)])')
                     sentBy, subject = self.extractDetails(details)
                     print "Sent by:", sentBy
-                    print "Subject:", subject
-                    if sentBy == self.expectedAddress:
+                    if self.expectedAddress in sentBy:
                         state, email = self.session.fetch(message, '(BODY[TEXT])')
                         state, data = self.session.store(message, '+FLAGS', '\\Seen')
+			print email
                         self.command = self.extractCommand(email)
                         print "Commanda: ", self.command
                         
@@ -160,16 +160,20 @@ class CommandReader (threading.Thread):
         detailsList = details[0][1].split(' ')
         fromWho = detailsList[len(detailsList)-1]
         subject = detailsList[1]
-        subject = subject[:-7]
-        fromWho = fromWho[:-4]
-        fromWho = fromWho[1:-1]
         return (fromWho, subject)
     
     def extractCommand(self, email):
         emailList = email[0][1].split()
         realCommand = emailList[len(emailList)-2]
-        realCommand = realCommand[10:-4]
-        return realCommand
+	if "startAlert" in realCommand:
+		command = "startAlert"
+	elif "stopAlert" in realCommand:
+		command = "stopAlert"
+	elif "sendTemperature" in realCommand:
+		command = "sendTemperature"
+	else :
+		command = ""
+        return command
 
 
 class EmailSender:
@@ -185,10 +189,9 @@ class EmailSender:
         self.message = MIMEMultipart()
         self.message['From'] = username
         self.message['To'] = recipient
-        self.message['Subject'] = 'ResponseFromHomecontroller'
 
     def sendMail(self, response):
-        self.message.attach(MIMEText(response, 'plain'))
+        self.message['Subject'] =  response
         text = self.message.as_string()
         self.session.sendmail(self.username, self.recipient, text)
 
