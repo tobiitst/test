@@ -114,7 +114,7 @@ class CommandReader (threading.Thread):
         self.username = username
         self.password = password
         self.session = imaplib.IMAP4_SSL('imap.gmail.com', 993)
-        self.expectedAddress = 'gaoprisor@gmail.com'
+        self.expectedAddress = 'adrtelefon@gmail.com'
         self.expectedSubject = 'Command'
         self.command = ' '
 
@@ -223,7 +223,6 @@ if __name__ == '__main__':
     thread1 = KeyFob(1)
     thread2 = SensorTag(2)
     thread3 = CommandReader(3, 'homecontrollerpy@gmail.com', 'py&raspberry')
-    sendMailObject = EmailSender('homecontrollerpy@gmail.com', 'py&raspberry', 'gaoprisor@gmail.com')
 
     # Start new Threads
     thread1.start()
@@ -241,7 +240,9 @@ if __name__ == '__main__':
         if(command == 'sendTemperature'):
             threadLock.acquire()
             print "Se trimite raspunsul"
+	    sendMailObject = EmailSender('homecontrollerpy@gmail.com', 'py&raspberry', 'adrtelefon@gmail.com')
             response = str(thread2.temperature)
+	    print "S-a transmis ", str(response)
             sendMailObject.sendMail(response)
             print "Response sent!"
             thread3.command = ' '
